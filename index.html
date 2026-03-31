@@ -2,7 +2,9 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>VIDEOLLAMADAS PRO</title>
+
 <style>
 body {
     margin:0;
@@ -11,27 +13,42 @@ body {
     font-family:Arial;
     text-align:center;
 }
+
+h2 {
+    margin-top:20px;
+}
+
 #video {
     width:100%;
     max-width:800px;
-    margin:auto;
-    border-radius:12px;
+    height:auto;
     background:black;
+    border-radius:12px;
+    margin-top:20px;
 }
+
 .controls {
     margin-top:20px;
 }
-button, select {
-    padding:10px;
+
+select, button {
+    padding:12px;
     margin:5px;
     border:none;
     border-radius:8px;
+    font-size:16px;
 }
+
 button {
     background:#22c55e;
     color:black;
     font-weight:bold;
 }
+
+button:hover {
+    background:#16a34a;
+}
+
 </style>
 </head>
 
@@ -43,48 +60,74 @@ button {
 
 <div class="controls">
     <select id="cameraSelect"></select>
-    <button onclick="startStream()">INICIAR</button>
+    <br>
+    <button onclick="startStream()">🚀 INICIAR TRANSMISIÓN</button>
 </div>
 
 <script>
+
 let localStream;
 
-async function getCameras(){
-    const devices = await navigator.mediaDevices.enumerateDevices();
-    const cams = devices.filter(d => d.kind === "videoinput");
-    const select = document.getElementById("cameraSelect");
+// 🔥 INICIALIZAR (PEDIR PERMISOS PRIMERO)
+async function init(){
+    try{
+        // Pedir permisos
+        await navigator.mediaDevices.getUserMedia({video:true, audio:true});
 
-    cams.forEach(cam=>{
-        let option = document.createElement("option");
-        option.value = cam.deviceId;
-        option.text = cam.label || "Cámara";
-        select.appendChild(option);
-    });
+        // Obtener cámaras
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const cams = devices.filter(d => d.kind === "videoinput");
+
+        const select = document.getElementById("cameraSelect");
+        select.innerHTML = "";
+
+        cams.forEach(cam=>{
+            let option = document.createElement("option");
+            option.value = cam.deviceId;
+            option.text = cam.label || "Cámara";
+            select.appendChild(option);
+        });
+
+    } catch(err){
+        alert("⚠️ Debes permitir cámara y micrófono");
+        console.error(err);
+    }
 }
 
+// 🚀 INICIAR STREAM
 async function startStream(){
     const deviceId = document.getElementById("cameraSelect").value;
 
-    localStream = await navigator.mediaDevices.getUserMedia({
-        video:{ deviceId: { exact: deviceId }},
-        audio:true
-    });
+    try{
+        localStream = await navigator.mediaDevices.getUserMedia({
+            video:{ deviceId: deviceId ? { exact: deviceId } : undefined },
+            audio:true
+        });
 
-    document.getElementById("video").srcObject = localStream;
+        document.getElementById("video").srcObject = localStream;
 
-    // 🔥 AQUÍ SE ENVÍA A VDO NINJA
-    const room = new URLSearchParams(window.location.search).get("room");
-    const slot = new URLSearchParams(window.location.search).get("slot");
+        // 🔥 PARAMETROS
+        const params = new URLSearchParams(window.location.search);
+        const room = params.get("room") || "SALA";
+        const slot = params.get("slot") || "INV1";
 
-    const iframe = document.createElement("iframe");
-    iframe.style.display="none";
+        // 🔥 VDO NINJA OCULTO
+        const iframe = document.createElement("iframe");
+        iframe.style.display="none";
 
-    iframe.src = `https://vdo.ninja/?push=${slot}&room=${room}&webcam&autostart&clean`;
+        iframe.src = `https://vdo.ninja/?push=${slot}&room=${room}&webcam&autostart&clean`;
 
-    document.body.appendChild(iframe);
+        document.body.appendChild(iframe);
+
+    } catch(err){
+        alert("❌ Error al iniciar cámara");
+        console.error(err);
+    }
 }
 
-getCameras();
+// Ejecutar al cargar
+init();
+
 </script>
 
 </body>
