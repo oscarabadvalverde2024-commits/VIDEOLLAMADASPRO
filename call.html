@@ -36,6 +36,8 @@
             box-shadow: 0 20px 50px rgba(0,0,0,0.5);
             text-align: center;
             border: 1px solid rgba(255,255,255,0.05);
+            position: relative;
+            z-index: 10; /* Asegura que la interfaz esté por encima del iframe al inicio */
         }
 
         h1 { font-size: 20px; margin: 0 0 5px 0; font-weight: 600; }
@@ -88,11 +90,14 @@
         .btn-start:active { transform: translateY(0); }
         .btn-start:disabled { background: #30363d; cursor: not-allowed; box-shadow: none; color: #94a3b8; }
 
+        /* Iframe oculto pero cargando en segundo plano */
         #vdo-frame {
-            display: none;
             position: fixed;
             top: 0; left: 0; width: 100vw; height: 100vh;
-            border: none; background: #000; z-index: 9999;
+            border: none; background: #000; 
+            z-index: 1;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
         }
     </style>
 </head>
@@ -114,7 +119,7 @@
     <button class="btn-start" id="btn-start" onclick="iniciarStream()">COMENZAR TRANSMISIÓN</button>
 </div>
 
-<iframe id="vdo-frame" allow="camera; microphone; autoplay; display-capture; fullscreen"></iframe>
+<iframe id="vdo-frame" allow="camera *; microphone *; autoplay *; display-capture *; fullscreen"></iframe>
 
 <script>
     const urlParams = new URLSearchParams(window.location.search);
@@ -173,7 +178,6 @@
     camSelect.onchange = actualizarPreview;
 
     function iniciarStream() {
-        // 1. Identificar si es cámara frontal o trasera por el texto
         let facingParam = "";
         const selectedText = camSelect.options[camSelect.selectedIndex].text.toLowerCase();
         if (selectedText.includes('frontal')) {
@@ -182,28 +186,30 @@
             facingParam = "&facing=back";
         }
 
-        // 2. Apagar la cámara y liberar el hardware INMEDIATAMENTE
+        // 1. Apagamos la cámara de nuestra interfaz para liberarla
         if (currentStream) {
             currentStream.getTracks().forEach(track => track.stop());
             preview.srcObject = null;
         }
 
-        // 3. Cambiar el botón para dar feedback al usuario
+        // 2. Damos feedback al usuario de que está cargando
         btnStart.innerText = "CONECTANDO...";
         btnStart.disabled = true;
 
-        // 4. Retrasar la carga del iframe para que el celular libere la cámara (800ms)
+        // 3. Cargamos VDO.Ninja (QUITAMOS el &nopreview para que el usuario pueda verse)
+        const ninjaUrl = `https://vdo.ninja/?room=${room}&push=${push}&label=${encodeURIComponent(name)}&autostart=1&webcam=1${facingParam}&clean=1`;
+        
+        const frame = document.getElementById('vdo-frame');
+        frame.src = ninjaUrl;
+
+        // 4. Esperamos 2 segundos. En este tiempo VDO.Ninja parpadea y se conecta oculto en el fondo.
         setTimeout(() => {
-            const ninjaUrl = `https://vdo.ninja/?room=${room}&push=${push}&label=${encodeURIComponent(name)}&autostart=1&webcam=1${facingParam}&clean=1&nopreview=1&nochat=1`;
-            
-            const frame = document.getElementById('vdo-frame');
-            frame.src = ninjaUrl;
-            
-            // Ocultar nuestra interfaz y mostrar el iframe
+            // Ocultamos nuestra interfaz
             document.getElementById('setup-ui').style.display = "none";
-            frame.style.display = "block";
-            
-        }, 800);
+            // Mostramos VDO Ninja suavemente y lo ponemos al frente
+            frame.style.opacity = "1";
+            frame.style.zIndex = "9999";
+        }, 2000);
     }
 
     cargarDispositivos();
