@@ -5,120 +5,176 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>StreamJav - Invitado</title>
 <style>
-  body {margin:0; padding:0; background:#181a1f; color:#eee; font-family:sans-serif;}
-  .container {max-width: 480px; margin: 0 auto; padding: 20px; text-align:center;}
-  h1 {font-size:24px; margin-bottom:20px;}
-  label {display:block; text-align:left; font-size:14px; margin-top:10px;}
-  input {width:100%; padding:8px; font-size:14px; border:1px solid #444; border-radius:4px;
-         background:#222; color:#eee;}
-  button {width:100%; margin-top:12px; padding:10px; font-size:16px; border:none; border-radius:4px;
-          background:#4ea1ff; color:#fff; cursor:pointer;}
-  button:disabled {opacity:0.6;}
-  .status {margin-top:12px; font-size:14px;}
-  .dot {display:inline-block; width:10px; height:10px; margin-left:6px;
-         border-radius:50%; background:#2ddc86;}
-  video {width:100%; max-height:200px; margin-top:10px; border:1px solid #444;
-         display:none; border-radius:4px; background:#000;}
-  #iframeContainer {display:none; position:fixed; inset:0;}
-  iframe {width:100%; height:100%; border:none;}
+  body {
+    margin: 0;
+    padding: 0;
+    background: #181a1f;
+    color: #eee;
+    font-family: sans-serif;
+  }
+  .container {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 20px;
+    text-align: center;
+  }
+  h1 {
+    font-size: 24px;
+    margin-bottom: 20px;
+  }
+  label {
+    display: block;
+    text-align: left;
+    font-size: 14px;
+    margin-top: 10px;
+    margin-bottom: 4px;
+  }
+  input[type="text"], select {
+    width: 100%;
+    padding: 8px;
+    font-size: 14px;
+    border: 1px solid #444;
+    border-radius: 4px;
+    background: #222;
+    color: #eee;
+  }
+  input:disabled {
+    background: #333;
+    color: #999;
+  }
+  button {
+    width: 100%;
+    margin-top: 20px;
+    padding: 10px;
+    font-size: 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  #joinBtn {
+    background: #2ddc86;
+    color: #fff;
+  }
+  button:disabled {
+    opacity: 0.6;
+  }
+  .status {
+    margin-top: 12px;
+    font-size: 14px;
+  }
+  .dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    margin-left: 6px;
+    border-radius: 50%;
+    background: #2ddc86;
+  }
+  video {
+    width: 100%;
+    max-height: 200px;
+    margin-top: 12px;
+    border: 1px solid #555;
+    background: #000;
+  }
 </style>
 </head>
 <body>
 <div class="container">
-  <h1>Ingreso Invitado</h1>
+  <h1 id="titleHeading">Bienvenido Invitado</h1>
   <div class="status">Listo para configurar <span class="dot"></span></div>
+  
   <label for="room">Sala</label>
-  <input id="room" value="PROINKASWITCH">
-  <label for="slot">Slot</label>
-  <input id="slot" value="INV1">
-  <label for="name">Nombre</label>
-  <input id="name" value="Invitado 1">
-  <button id="permissionBtn">Permitir cámara</button>
-  <button id="enterBtn">Entrar a la sala</button>
-  <button id="copyBtn">Copiar enlace</button>
-  <button id="backBtn">Volver</button>
-  <video id="localPreview" autoplay muted playsinline></video>
-</div>
-<div id="iframeContainer">
-  <iframe id="vdoFrame"
-          allow="camera *;microphone *;fullscreen;display-capture;autoplay"
-          allowfullscreen
-          referrerpolicy="no-referrer"></iframe>
+  <input id="room" type="text" disabled>
+
+  <label for="mediaType">Fuente de video</label>
+  <select id="mediaType">
+    <option value="user">Cámara frontal</option>
+    <option value="environment">Cámara trasera</option>
+  </select>
+
+  <button id="joinBtn" disabled>COMENZAR</button>
+
+  <video id="localPreview" autoplay playsinline muted></video>
+  <div id="iframeContainer"></div>
 </div>
 
 <script>
+// Referencias a elementos DOM
 const roomInput = document.getElementById('room');
-const slotInput = document.getElementById('slot');
-const nameInput = document.getElementById('name');
-const permissionBtn = document.getElementById('permissionBtn');
-const enterBtn = document.getElementById('enterBtn');
-const copyBtn = document.getElementById('copyBtn');
-const backBtn = document.getElementById('backBtn');
+const mediaTypeSelect = document.getElementById('mediaType');
+const joinBtn = document.getElementById('joinBtn');
 const localPreview = document.getElementById('localPreview');
 const iframeContainer = document.getElementById('iframeContainer');
-const vdoFrame = document.getElementById('vdoFrame');
-const statusText = document.querySelector('.status');
-const dot = document.querySelector('.dot');
-let currentStream;
+const titleHeading = document.getElementById('titleHeading');
 
+// Leer parámetros de la URL (p.ej. ?slot=INV1&room=NombreSala)
+const params = new URLSearchParams(window.location.search);
+const slotParam = params.get('slot');
+const roomParam = params.get('room');
+
+// Actualizar título con número de invitado
+if (slotParam) {
+    const num = slotParam.replace(/[^0-9]/g, '');
+    if (num) {
+        titleHeading.textContent = 'Bienvenido Invitado ' + num;
+    }
+}
+// Establecer y mostrar la sala (solo lectura)
+if (roomParam) {
+    roomInput.value = roomParam;
+} else {
+    roomInput.value = 'PROINKASWITHC';
+}
+
+// Mostrar previsualización local de video
+let currentStream = null;
+navigator.mediaDevices.getUserMedia({ video: true })
+  .then(stream => {
+    currentStream = stream;
+    localPreview.srcObject = stream;
+    // Habilitar botón COMENZAR cuando la cámara esté lista
+    joinBtn.disabled = false;
+  })
+  .catch(() => {
+    alert('No se pudo acceder a la cámara');
+});
+
+// Actualizar mensaje de estado
+function updateStatus(msg, color = '#eee') {
+  const statusEl = document.querySelector('.status');
+  statusEl.firstChild.textContent = msg;
+  statusEl.querySelector('.dot').style.background = color;
+}
+
+// Construir la URL de VDO.Ninja con parámetros
 function buildRoomURL() {
-    const url = new URL('https://vdo.ninja/');
-    url.searchParams.set('room', roomInput.value.trim() || 'PROINKASWITCH');
-    url.searchParams.set('push', slotInput.value.trim() || 'INV1');
-    url.searchParams.set('name', nameInput.value.trim() || '');
-    url.searchParams.set('autostart', '');
-    url.searchParams.set('webcam', '');
-    url.searchParams.set('cleanoutput', '');
-    url.searchParams.set('transparent', '');
-    url.searchParams.set('nochat', '');
-    url.searchParams.set('nodashboard', '');
-    url.searchParams.set('header', 'STREAMJAV');
-    url.searchParams.set('btntxt', 'ENTRAR');
-    url.searchParams.set('language', 'es');
-    return url.toString();
+  const url = new URL('https://vdo.ninja/');
+  url.searchParams.set('room', roomInput.value.trim());
+  if (slotParam) {
+    url.searchParams.set('push', slotParam);
+    // Nombre visible (Invitado X)
+    const name = 'Invitado ' + (slotParam.replace(/[^0-9]/g, '') || '');
+    url.searchParams.set('name', name);
+  }
+  url.searchParams.set('autostart', '');
+  url.searchParams.set('webcam', '');
+  url.searchParams.set('cleanoutput', '');
+  return url;
 }
 
-function updateStatus(message, color='#2ddc86') {
-    statusText.textContent = message;
-    dot.style.background = color;
+// Iniciar el stream de audio/video y crear el iframe
+async function startStream() {
+  const mediaStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+  localPreview.srcObject = mediaStream;
+  const url = buildRoomURL();
+  iframeContainer.innerHTML = `<iframe allow="microphone; camera" id="vdoIframe" src="${url}" style="width:100%; height:75vh;"></iframe>`;
 }
 
-async function startPreview() {
-    updateStatus('Solicitando permisos...');
-    if (currentStream) {
-        currentStream.getTracks().forEach(t => t.stop());
-        localPreview.srcObject = null;
-    }
-    try {
-        currentStream = await navigator.mediaDevices.getUserMedia({video: true, audio: true});
-        localPreview.srcObject = currentStream;
-        localPreview.style.display = 'block';
-        updateStatus('Permiso concedido', '#2ddc86');
-    } catch (err) {
-        console.error(err);
-        updateStatus('No se pudo acceder a la cámara', '#ff5d6c');
-    }
-}
-
-permissionBtn.addEventListener('click', startPreview);
-enterBtn.addEventListener('click', () => {
-    const url = buildRoomURL();
-    vdoFrame.src = url;
-    iframeContainer.style.display = 'block';
-    updateStatus('Conectando a la sala...', '#4ea1ff');
-});
-copyBtn.addEventListener('click', () => {
-    navigator.clipboard.writeText(buildRoomURL());
-    updateStatus('Enlace copiado');
-});
-backBtn.addEventListener('click', () => {
-    iframeContainer.style.display = 'none';
-    if (currentStream) {
-        currentStream.getTracks().forEach(t => t.stop());
-        currentStream = null;
-        localPreview.srcObject = null;
-    }
-    updateStatus('Listo para configurar', '#2ddc86');
+joinBtn.addEventListener('click', async () => {
+  updateStatus('Entrando a sala...', '#2ddc86');
+  await startStream();
+  updateStatus('Conectado', '#2ddc86');
 });
 </script>
 </body>
