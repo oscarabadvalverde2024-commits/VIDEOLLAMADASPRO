@@ -8,7 +8,7 @@
     :root{
       --bg:#0b1020;
       --bg2:#10182a;
-      --card:#121a2b;
+      --card:rgba(18,26,43,.96);
       --line:rgba(255,255,255,.08);
       --text:#eef4ff;
       --muted:#8ea3c7;
@@ -30,9 +30,7 @@
     }
 
     body.session-live .app{
-      opacity:0;
-      pointer-events:none;
-      transform:translateY(10px);
+      display:none;
     }
 
     .app{
@@ -41,7 +39,6 @@
       padding:14px 0 24px;
       padding-top:calc(14px + env(safe-area-inset-top));
       padding-bottom:calc(24px + env(safe-area-inset-bottom));
-      transition:opacity .25s ease, transform .25s ease;
     }
 
     .topbar{
@@ -212,12 +209,6 @@
       margin-top:16px;
     }
 
-    .row{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:12px;
-    }
-
     .field{
       display:flex;
       flex-direction:column;
@@ -282,12 +273,6 @@
       background:linear-gradient(135deg, var(--accent), var(--accent2));
       color:#06140d;
       box-shadow:0 14px 28px rgba(55,226,143,.18);
-    }
-
-    .btn-dark{
-      background:rgba(255,255,255,.06);
-      color:var(--text);
-      border:1px solid var(--line);
     }
 
     .chips{
@@ -420,67 +405,8 @@
       background:#000;
     }
 
-    .loading-mask{
-      position:fixed;
-      inset:0;
-      z-index:210;
-      display:none;
-      align-items:center;
-      justify-content:center;
-      background:linear-gradient(180deg, rgba(5,8,16,.90), rgba(5,8,16,.94));
-      backdrop-filter:blur(10px);
-      color:var(--text);
-      text-align:center;
-      padding:24px;
-    }
-
-    .loading-mask.on{display:flex}
-
-    .loading-card{
-      width:min(360px, 100%);
-      border:1px solid var(--line);
-      border-radius:24px;
-      background:rgba(255,255,255,.04);
-      box-shadow:var(--shadow);
-      padding:22px 18px;
-    }
-
-    .spinner{
-      width:40px;
-      height:40px;
-      border-radius:50%;
-      border:3px solid rgba(255,255,255,.12);
-      border-top-color:var(--accent);
-      margin:0 auto 14px;
-      animation:spin 1s linear infinite;
-    }
-
-    @keyframes spin{
-      to{transform:rotate(360deg)}
-    }
-
-    .loading-card h3{
-      margin:0 0 6px;
-      font-size:18px;
-    }
-
-    .loading-card p{
-      margin:0;
-      color:var(--muted);
-      font-size:13px;
-      line-height:1.5;
-    }
-
-    .small{
-      display:block;
-      margin-top:10px;
-      color:var(--muted);
-      font-size:12px;
-    }
-
     @media (max-width: 900px){
       .stats{grid-template-columns:1fr}
-      .row{grid-template-columns:1fr}
       .btn{flex-basis:100%}
     }
 
@@ -492,15 +418,6 @@
   </style>
 </head>
 <body>
-  <div class="loading-mask" id="loadingMask" aria-hidden="true">
-    <div class="loading-card">
-      <div class="spinner"></div>
-      <h3>Conectando a la sala</h3>
-      <p>Preparando cámara y aplicando interfaz limpia.</p>
-      <span class="small" id="loadingSmall">Espera un momento…</span>
-    </div>
-  </div>
-
   <div class="app" id="app">
     <div class="topbar">
       <div class="brand">
@@ -524,10 +441,10 @@
             <span>Interfaz minimalista</span>
           </div>
           <div class="panel-body">
-            <h2 class="title">Bienvenido Invitado 1</h2>
+            <h2 class="title" id="titleText">Bienvenido Invitado 1</h2>
             <p class="subtitle">
               Selecciona la cámara frontal o trasera y presiona comenzar.
-              La página final se abre limpia, sin mostrar menús extra ni pantallas de configuración visibles.
+              La pantalla interna se abre limpia y sin mostrar la interfaz completa de VDO.Ninja.
             </p>
 
             <div class="stats">
@@ -575,7 +492,7 @@
               <div class="line">Enlace final preparado</div>
               <code id="roomLinkBox">—</code>
               <div class="hint">
-                Al entrar, la vista previa local se apaga para evitar doble cámara y la página interna se carga con una versión limpia y disfrazada.
+                Se oculta la vista local al entrar y se abre la conexión con la cámara ya seleccionada.
               </div>
             </div>
           </div>
@@ -600,7 +517,7 @@
               </div>
             </div>
             <div class="hint">
-              Si cambias la cámara, la vista previa se reinicia para que el navegador aplique el cambio correctamente.
+              Si cambias la cámara, la vista previa se reinicia para aplicar el cambio de forma correcta.
             </div>
           </div>
         </div>
@@ -611,7 +528,7 @@
   <div id="iframeContainer">
     <iframe
       id="vdoFrame"
-      allow="camera *; microphone *; fullscreen; display-capture; autoplay; picture-in-picture"
+      allow="camera *; microphone *; fullscreen; autoplay; picture-in-picture"
       allowfullscreen
       referrerpolicy="no-referrer"
     ></iframe>
@@ -633,13 +550,12 @@
     const previewHeadState = $("previewHeadState");
     const cameraPreview = $("cameraPreview");
     const facingChip = $("facingChip");
-    const loadingMask = $("loadingMask");
-    const loadingSmall = $("loadingSmall");
     const mainTitle = $("mainTitle");
     const mainSubtitle = $("mainSubtitle");
     const guestPreview = $("guestPreview");
     const guestChip = $("guestChip");
     const roomChip = $("roomChip");
+    const titleText = $("titleText");
 
     const params = new URLSearchParams(location.search);
     const roomName = (params.get("room") || "PROINKASWITCH").trim();
@@ -654,6 +570,7 @@
     roomInput.value = roomName;
     mainTitle.textContent = `Bienvenido ${guestName}`;
     mainSubtitle.textContent = `Acceso preparado para ${roomName}`;
+    titleText.textContent = `Bienvenido ${guestName}`;
     guestPreview.textContent = guestName;
     guestChip.textContent = `Bienvenido ${guestName}`;
     roomChip.textContent = roomName;
@@ -703,105 +620,54 @@
       roomLinkBox.textContent = buildRoomURL();
     }
 
-    function b64(str){
-      return btoa(unescape(encodeURIComponent(str)));
-    }
-
     function buildDisguiseJS(){
-      const welcome = `Bienvenido ${guestName}`;
       return `
 (function(){
-  const WELCOME = ${JSON.stringify(welcome)};
-  const ROOM = ${JSON.stringify(roomName)};
-  const mutedText = "Preparando acceso";
+  const guestName = ${JSON.stringify(guestName)};
+  const roomName = ${JSON.stringify(roomName)};
+  const welcome = "Bienvenido " + guestName;
 
-  const style = document.createElement('style');
-  style.textContent = \`
-    html, body { background:#050812 !important; color:#eef4ff !important; }
-    body { overflow:hidden !important; }
-    a, header, nav { text-decoration:none !important; }
-    #app, .app, main { background:#050812 !important; }
-    button, select, input { border-radius:14px !important; }
-    * { scrollbar-width: thin; }
-  \`;
-  document.head.appendChild(style);
+  const apply = () => {
+    document.title = "StreamJav | Invitado";
 
-  const replaceText = () => {
-    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
-    const targets = [];
-    while (walker.nextNode()) targets.push(walker.currentNode);
-    for (const node of targets) {
-      const txt = node.nodeValue || "";
-      if (/Join Room with Camera/i.test(txt)) node.nodeValue = WELCOME;
-      if (/Screenshare with Room/i.test(txt)) node.nodeValue = "";
-      if (/Source of video/i.test(txt)) node.nodeValue = "Fuente de video";
-      if (/Select audio source/i.test(txt)) node.nodeValue = "";
-      if (/Destination of output/i.test(txt)) node.nodeValue = "";
-      if (/Enter room/i.test(txt)) node.nodeValue = "COMENZAR";
-    }
-
-    const all = [...document.querySelectorAll('*')];
-
-    all.forEach(el => {
-      const text = (el.textContent || '').trim();
-      const aria = (el.getAttribute('aria-label') || '').trim();
-      const title = (el.getAttribute('title') || '').trim();
-      const combined = (text + ' ' + aria + ' ' + title).toLowerCase();
-
-      if (!combined) return;
-
-      if (combined.includes('screenshare with room')) {
-        el.style.display = 'none';
-      }
-
-      if (combined.includes('select audio source') || combined.includes('audio source') || combined.includes('destination of output') || combined.includes('output destination')) {
-        const card = el.closest('section, article, .card, .panel, .box, .row, label, fieldset, div');
-        (card || el).style.display = 'none';
-      }
-
-      if (combined.includes('join room with camera')) {
-        el.textContent = WELCOME;
-      }
-
-      if (combined.includes('vdo.ninja')) {
-        el.style.display = 'none';
-      }
+    const texts = [...document.querySelectorAll("h1,h2,h3,p,span,strong,label,button,small,div")];
+    texts.forEach(el => {
+      const t = (el.textContent || "").trim().toLowerCase();
+      if (t === "join room with camera") el.textContent = welcome;
+      if (t.includes("screenshare with room")) el.style.display = "none";
+      if (t.includes("select audio source")) el.style.display = "none";
+      if (t.includes("destination of output")) el.style.display = "none";
+      if (t.includes("audio source")) el.style.display = "none";
+      if (t.includes("output destination")) el.style.display = "none";
+      if (t.includes("vdo.ninja")) el.style.display = "none";
     });
 
-    const buttons = [...document.querySelectorAll('button')];
+    const nodes = [...document.querySelectorAll("*")];
+    nodes.forEach(el => {
+      const text = ((el.textContent || "") + " " + (el.getAttribute("aria-label") || "") + " " + (el.getAttribute("title") || "")).toLowerCase();
+
+      if (text.includes("screenshare with room")) el.style.display = "none";
+      if (text.includes("select audio source")) el.style.display = "none";
+      if (text.includes("destination of output")) el.style.display = "none";
+      if (text.includes("audio source")) el.style.display = "none";
+      if (text.includes("output destination")) el.style.display = "none";
+      if (text.includes("vdo.ninja")) el.style.display = "none";
+      if (text.includes("join room with camera")) el.textContent = welcome;
+    });
+
+    const buttons = [...document.querySelectorAll("button")];
     buttons.forEach(btn => {
-      const t = (btn.textContent || '').trim().toLowerCase();
-      if (t === 'join' || t === 'enter' || t.includes('join room')) {
-        btn.textContent = 'COMENZAR';
-      }
-      if (t.includes('screenshare')) {
-        btn.style.display = 'none';
-      }
-    });
-
-    const labels = [...document.querySelectorAll('label, h1, h2, h3, p, span, small, strong')];
-    labels.forEach(el => {
-      const t = (el.textContent || '').trim().toLowerCase();
-      if (t === 'join room with camera') el.textContent = WELCOME;
-      if (t === 'screenshare with room') el.style.display = 'none';
-      if (t.includes('select audio source')) el.style.display = 'none';
-      if (t.includes('destination of output')) el.style.display = 'none';
+      const t = (btn.textContent || "").trim().toLowerCase();
+      if (t === "join" || t === "enter" || t.includes("join room")) btn.textContent = "COMENZAR";
+      if (t.includes("screenshare")) btn.style.display = "none";
     });
   };
 
-  const observer = new MutationObserver(replaceText);
+  const observer = new MutationObserver(apply);
   observer.observe(document.documentElement, { childList:true, subtree:true, characterData:true });
-
-  const interval = setInterval(() => {
-    replaceText();
-    if (document.readyState === 'complete') {
-      clearInterval(interval);
-      setTimeout(replaceText, 200);
-      setTimeout(replaceText, 800);
-    }
-  }, 120);
-
-  replaceText();
+  apply();
+  setTimeout(apply, 150);
+  setTimeout(apply, 700);
 })();
       `.trim();
     }
@@ -814,22 +680,21 @@ a[href*="vdo.ninja"], header, nav{display:none !important;}
       `.trim();
     }
 
+    function b64(str){
+      return btoa(unescape(encodeURIComponent(str)));
+    }
+
     function buildRoomURL(){
       const url = new URL("https://vdo.ninja/");
       url.searchParams.set("room", roomName);
       url.searchParams.set("push", slotName);
-      url.searchParams.set("name", guestName);
+      url.searchParams.set("webcam", "");
       url.searchParams.set("language", "es");
       url.searchParams.set("header", "SALA");
       url.searchParams.set("btntxt", "ENTRAR");
-      url.searchParams.set("cleanoutput", "");
-      url.searchParams.set("hidehome", "");
-      url.searchParams.set("webcam", "");
+      url.searchParams.set("clean", "");
       url.searchParams.set("nopreview", "");
       url.searchParams.set("noaudio", "");
-      url.searchParams.set("nochat", "");
-      url.searchParams.set("nodashboard", "");
-      url.searchParams.set("autostart", "");
       url.searchParams.set("facing", vdoFacing(currentFacing));
       url.searchParams.set("base64js", b64(buildDisguiseJS()));
       url.searchParams.set("base64css", b64(buildDisguiseCSS()));
@@ -910,15 +775,6 @@ a[href*="vdo.ninja"], header, nav{display:none !important;}
 
       document.body.classList.add("session-live");
       iframeContainer.style.display = "block";
-      loadingMask.classList.add("on");
-      loadingSmall.textContent = `Sala ${roomName} · ${guestName}`;
-
-      vdoFrame.onload = () => {
-        setTimeout(() => {
-          loadingMask.classList.remove("on");
-        }, 900);
-      };
-
       vdoFrame.src = url;
       setStatus("Conectando a la sala...", "good");
     }
