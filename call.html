@@ -1,158 +1,190 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>StreamJav | Invitado</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: 'Inter', Arial, sans-serif;
-      background: #07111f;
-      color: #fff;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      overflow: hidden;
-    }
-    .container {
-      width: 90%;
-      max-width: 380px;
-      text-align: center;
-      z-index: 10;
-    }
-    h1 { font-size: 22px; margin-bottom: 5px; color: #eef4ff; }
-    .sala { color: #4ea1ff; margin-bottom: 20px; font-weight: bold; text-transform: uppercase; }
-    video {
-      width: 100%;
-      aspect-ratio: 16/9;
-      border-radius: 16px;
-      background: #000;
-      margin-bottom: 15px;
-      object-fit: cover;
-      border: 2px solid rgba(255,255,255,0.1);
-    }
-    select {
-      width: 100%;
-      padding: 12px;
-      border-radius: 12px;
-      border: 1px solid rgba(255,255,255,0.1);
-      margin-bottom: 15px;
-      background: #1a2135;
-      color: #fff;
-      outline: none;
-    }
-    button {
-      width: 100%;
-      padding: 14px;
-      border: none;
-      border-radius: 14px;
-      background: linear-gradient(135deg, #2ddc86, #80ffbf);
-      color: #05130a;
-      font-weight: 800;
-      font-size: 16px;
-      cursor: pointer;
-      transition: transform 0.2s;
-    }
-    button:active { transform: scale(0.98); }
-    
-    /* Iframe de VDO.Ninja pantalla completa al activar */
-    #frame {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      border: none;
-      background: #000;
-      z-index: 100;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>StreamJav | Conexión de Invitado</title>
+    <style>
+        :root {
+            --bg: #0b0e14;
+            --card: #161b22;
+            --accent: #3b82f6;
+            --green: #22c55e;
+            --text: #e2e8f0;
+            --text-muted: #94a3b8;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .main-container {
+            width: 90%;
+            max-width: 400px;
+            background: var(--card);
+            padding: 30px;
+            border-radius: 24px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        h1 { font-size: 20px; margin: 0 0 5px 0; font-weight: 600; }
+        .room-label { color: var(--accent); font-size: 14px; font-weight: 700; text-transform: uppercase; margin-bottom: 25px; display: block; }
+
+        .preview-box {
+            width: 100%;
+            aspect-ratio: 16/9;
+            background: #000;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            overflow: hidden;
+            border: 2px solid rgba(255,255,255,0.1);
+            position: relative;
+        }
+
+        video { width: 100%; height: 100%; object-fit: cover; }
+
+        .control-group { text-align: left; margin-bottom: 20px; }
+        label { display: block; font-size: 11px; color: var(--text-muted); font-weight: 700; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        select {
+            width: 100%;
+            padding: 14px;
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            color: #fff;
+            font-size: 15px;
+            outline: none;
+            cursor: pointer;
+            appearance: none;
+        }
+
+        .btn-start {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            border: none;
+            border-radius: 14px;
+            color: white;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-start:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4); }
+        .btn-start:active { transform: translateY(0); }
+
+        #vdo-frame {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            border: none; background: #000; z-index: 9999;
+        }
+    </style>
 </head>
 <body>
 
-<div class="container" id="ui-setup">
-  <h1 id="displayName">Preparando conexión...</h1>
-  <div class="sala" id="displayRoom">---</div>
+<div class="main-container" id="setup-ui">
+    <h1 id="user-title">Bienvenido</h1>
+    <span class="room-label" id="room-name">Videollamada</span>
 
-  <video id="preview" autoplay muted playsinline></video>
+    <div class="preview-box">
+        <video id="local-preview" autoplay muted playsinline></video>
+    </div>
 
-  <label style="font-size: 12px; color: #a4b7d5; display: block; margin-bottom: 8px;">SELECCIONAR CÁMARA</label>
-  <select id="cameraSelect">
-    <option value="user">Cámara Frontal</option>
-    <option value="environment">Cámara Trasera</option>
-  </select>
+    <div class="control-group">
+        <label>Fuente de Video</label>
+        <select id="cam-select"></select>
+    </div>
 
-  <button onclick="entrar()">COMENZAR TRANSMISIÓN</button>
+    <button class="btn-start" onclick="iniciarStream()">COMENZAR TRANSMISIÓN</button>
 </div>
 
-<iframe 
-  id="frame" 
-  allow="camera *; microphone *; autoplay; fullscreen; display-capture; picture-in-picture"
-  referrerpolicy="no-referrer">
-</iframe>
+<iframe id="vdo-frame" allow="camera; microphone; autoplay; display-capture; fullscreen"></iframe>
 
 <script>
-  const params = new URLSearchParams(window.location.search);
-  const room = params.get("room") || "PROINKASWITCH";
-  const slot = params.get("slot") || "INV1";
-  const name = params.get("name") || "Invitado";
-  
-  document.getElementById("displayName").textContent = `Hola, ${name}`;
-  document.getElementById("displayRoom").textContent = `Sala: ${room}`;
+    const urlParams = new URLSearchParams(window.location.search);
+    const room = urlParams.get('room') || 'PROINKASWITCH';
+    const push = urlParams.get('push') || 'INV1';
+    const name = urlParams.get('name') || 'Invitado';
 
-  let stream;
-  let facing = "user";
+    document.getElementById('user-title').innerText = `Hola, ${name}`;
+    document.getElementById('room-name').innerText = `SALA: ${room}`;
 
-  async function iniciarCamara() {
-    if (stream) {
-      stream.getTracks().forEach(t => t.stop());
-    }
-    try {
-      stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: facing },
-        audio: true
-      });
-      document.getElementById("preview").srcObject = stream;
-    } catch (e) {
-      console.error(e);
-      alert("Error: Asegúrate de dar permisos de cámara y micrófono.");
-    }
-  }
+    const camSelect = document.getElementById('cam-select');
+    const preview = document.getElementById('local-preview');
+    let currentStream = null;
 
-  document.getElementById("cameraSelect").onchange = (e) => {
-    facing = e.target.value;
-    iniciarCamara();
-  };
-
-  function entrar() {
-    // Detenemos la preview local para liberar el hardware para el iframe
-    if (stream) {
-      stream.getTracks().forEach(t => t.stop());
+    // Función para traducir nombres de cámaras
+    function traducirNombreCamara(label, index) {
+        label = label.toLowerCase();
+        if (label.includes('front') || label.includes('frontal') || label.includes('user')) {
+            return "Cámara Frontal";
+        } else if (label.includes('back') || label.includes('trasera') || label.includes('environment')) {
+            return "Cámara Trasera";
+        }
+        return `Cámara ${index + 1}`;
     }
 
-    // Construcción de URL con autostart y parámetros dinámicos
-    const vdoUrl = new URL("https://vdo.ninja/");
-    vdoUrl.searchParams.set("room", room);
-    vdoUrl.searchParams.set("push", slot);
-    vdoUrl.searchParams.set("label", name);
-    vdoUrl.searchParams.set("webcam", "");
-    vdoUrl.searchParams.set("autostart", ""); // Salta la configuración de Ninja
-    vdoUrl.searchParams.set("clean", "");
-    vdoUrl.searchParams.set("nopreview", "");
-    vdoUrl.searchParams.set("facing", facing);
-    vdoUrl.searchParams.set("nochat", "");
+    // Obtener lista de cámaras
+    async function cargarDispositivos() {
+        try {
+            await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            const videoDevices = devices.filter(d => d.kind === 'videoinput');
+            
+            camSelect.innerHTML = '';
+            videoDevices.forEach((device, index) => {
+                const option = document.createElement('option');
+                option.value = device.deviceId;
+                option.text = traducirNombreCamara(device.label, index);
+                camSelect.appendChild(option);
+            });
 
-    const frame = document.getElementById("frame");
-    frame.src = vdoUrl.toString();
-    frame.style.display = "block";
-    document.getElementById("ui-setup").style.display = "none";
-  }
+            actualizarPreview();
+        } catch (e) {
+            alert("Por favor, permite el acceso a la cámara y micrófono.");
+        }
+    }
 
-  // Inicializar al cargar
-  iniciarCamara();
+    async function actualizarPreview() {
+        if (currentStream) currentStream.getTracks().forEach(t => t.stop());
+        
+        currentStream = await navigator.mediaDevices.getUserMedia({
+            video: { deviceId: { exact: camSelect.value } },
+            audio: true
+        });
+        preview.srcObject = currentStream;
+    }
+
+    camSelect.onchange = actualizarPreview;
+
+    function iniciarStream() {
+        if (currentStream) currentStream.getTracks().forEach(t => t.stop());
+
+        // Construcción de la URL de VDO.Ninja con autostart
+        const ninjaUrl = `https://vdo.ninja/?room=${room}&push=${push}&label=${name}&vdev=${camSelect.value}&autostart&webcam&clean&nopreview&nochat`;
+
+        const frame = document.getElementById('vdo-frame');
+        frame.src = ninjaUrl;
+        frame.style.display = "block";
+        document.getElementById('setup-ui').style.display = "none";
+    }
+
+    cargarDispositivos();
 </script>
 
 </body>
