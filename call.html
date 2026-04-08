@@ -216,25 +216,6 @@
             cursor: not-allowed;
         }
 
-        .helper-row {
-            margin-top: 10px;
-            display: flex;
-            justify-content: space-between;
-            gap: 10px;
-            flex-wrap: wrap;
-            color: var(--text-muted);
-            font-size: 12px;
-            line-height: 1.4;
-        }
-
-        .helper-chip {
-            padding: 8px 10px;
-            border-radius: 999px;
-            border: 1px solid var(--line);
-            background: rgba(255,255,255,0.03);
-            white-space: nowrap;
-        }
-
         #vdo-frame {
             position: fixed;
             top: 0;
@@ -297,11 +278,6 @@
     </div>
 
     <button class="btn-start" id="btn-start" onclick="iniciarStream()">COMENZAR TRANSMISIÓN</button>
-
-    <div class="helper-row">
-        <div class="helper-chip">Vista previa local</div>
-        <div class="helper-chip">Modo móvil optimizado</div>
-    </div>
 </div>
 
 <iframe id="vdo-frame" allow="camera *; microphone *; autoplay *; display-capture *; fullscreen" referrerpolicy="no-referrer"></iframe>
