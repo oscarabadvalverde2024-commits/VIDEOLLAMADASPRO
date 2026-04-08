@@ -13,7 +13,8 @@
             --card-2: #0f141c;
             --accent: #3b82f6;
             --accent-2: #2563eb;
-            --accent-3: #60a5fa;
+            --green: #22c55e;
+            --green-2: #16a34a;
             --text: #e2e8f0;
             --text-muted: #94a3b8;
             --line: rgba(255, 255, 255, 0.08);
@@ -117,8 +118,8 @@
 
         .room-label {
             display: block;
-            margin-bottom: 14px;
-            color: var(--accent-3);
+            margin-bottom: 12px;
+            color: var(--accent-3, #60a5fa);
             font-size: 13px;
             font-weight: 800;
             text-transform: uppercase;
@@ -150,6 +151,38 @@
             object-fit: contain;
             background: #05070c;
             display: block;
+        }
+
+        .camera-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .cam-btn {
+            min-height: 54px;
+            padding: 12px 10px;
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.08);
+            background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+            color: #e5eefc;
+            font-size: 14px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: transform .16s ease, border-color .16s ease, background .16s ease, color .16s ease;
+            width: 100%;
+        }
+
+        .cam-btn:active {
+            transform: translateY(1px);
+        }
+
+        .cam-btn.active {
+            border-color: rgba(59, 130, 246, 0.45);
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.22), rgba(37, 99, 235, 0.16));
+            color: #ffffff;
+            box-shadow: 0 10px 24px rgba(59, 130, 246, 0.12);
         }
 
         .control-group {
@@ -185,7 +218,7 @@
             width: 100%;
             min-height: 58px;
             padding: 16px 18px;
-            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+            background: linear-gradient(135deg, var(--green) 0%, var(--green-2) 100%);
             border: none;
             border-radius: 16px;
             color: white;
@@ -194,7 +227,7 @@
             letter-spacing: .02em;
             cursor: pointer;
             transition: transform .16s ease, filter .16s ease, opacity .16s ease;
-            box-shadow: 0 10px 24px rgba(59, 130, 246, 0.22);
+            box-shadow: 0 10px 24px rgba(34, 197, 94, 0.22);
         }
 
         .btn-start:hover {
@@ -259,6 +292,15 @@
                 aspect-ratio: 3 / 4;
                 max-height: 50vh;
             }
+
+            .camera-row {
+                gap: 8px;
+            }
+
+            .cam-btn {
+                min-height: 50px;
+                font-size: 13px;
+            }
         }
     </style>
 </head>
@@ -272,10 +314,15 @@
 
     <h1 id="user-title">Bienvenido</h1>
     <span class="room-label" id="room-name">SALA: VIDEOLLAMADA</span>
-    <p class="subtext">Selecciona tu cámara y comienza la transmisión dentro de una interfaz limpia y móvil.</p>
+    <p class="subtext">Selecciona tu cámara y comienza la transmisión</p>
 
     <div class="preview-box">
         <video id="local-preview" autoplay muted playsinline></video>
+    </div>
+
+    <div class="camera-row">
+        <button type="button" class="cam-btn active" id="btn-front" onclick="seleccionarCamara('front')">Cámara Frontal</button>
+        <button type="button" class="cam-btn" id="btn-back" onclick="seleccionarCamara('back')">Cámara Trasera</button>
     </div>
 
     <div class="control-group">
@@ -286,8 +333,8 @@
     <button class="btn-start" id="btn-start" onclick="iniciarStream()">COMENZAR TRANSMISIÓN</button>
 
     <div class="helper-row">
-        <div class="helper-chip">Cámara frontal / trasera</div>
         <div class="helper-chip">Vista previa local</div>
+        <div class="helper-chip">Modo móvil optimizado</div>
     </div>
 </div>
 
@@ -305,7 +352,10 @@
     const camSelect = document.getElementById('cam-select');
     const preview = document.getElementById('local-preview');
     const btnStart = document.getElementById('btn-start');
+    const btnFront = document.getElementById('btn-front');
+    const btnBack = document.getElementById('btn-back');
     let currentStream = null;
+    let cameraMode = 'front';
 
     function traducirNombre(label, index) {
         let l = (label || '').toLowerCase();
@@ -353,6 +403,26 @@
     }
 
     camSelect.onchange = actualizarPreview;
+
+    function seleccionarCamara(tipo) {
+        cameraMode = tipo;
+        btnFront.classList.toggle('active', tipo === 'front');
+        btnBack.classList.toggle('active', tipo === 'back');
+
+        const txts = Array.from(camSelect.options).map(opt => opt.text.toLowerCase());
+        let idx = -1;
+
+        if (tipo === 'front') {
+            idx = txts.findIndex(t => t.includes('frontal') || t.includes('front') || t.includes('user'));
+        } else if (tipo === 'back') {
+            idx = txts.findIndex(t => t.includes('trasera') || t.includes('back') || t.includes('environment'));
+        }
+
+        if (idx >= 0) {
+            camSelect.selectedIndex = idx;
+            actualizarPreview();
+        }
+    }
 
     function iniciarStream() {
         let facing = "front";
