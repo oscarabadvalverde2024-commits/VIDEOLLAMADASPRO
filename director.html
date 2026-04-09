@@ -18,9 +18,10 @@
     margin: 0;
     background: #000;
     overflow: hidden;
-    font-family: Inter, system-ui, -apple-system, sans-serif;
+    font-family: 'Inter', system-ui, sans-serif;
   }
   
+  /* Contenedor del Iframe */
   iframe {
     position: fixed;
     top: 0;
@@ -31,69 +32,52 @@
     z-index: 1;
   }
 
+  /* Barra Superior StreamJav (Se dibuja sobre el Iframe) */
   .streamjav-overlay {
     position: fixed;
     top: 0;
     left: 0;
     height: 48px;
-    width: calc(100% - 280px); 
-    background: linear-gradient(90deg, var(--bg) 0%, var(--bg) 70%, transparent 100%);
+    width: 100%;
+    background: rgba(7, 17, 31, 0.95);
+    backdrop-filter: blur(10px);
     z-index: 10;
     display: flex;
     align-items: center;
-    padding: 0 18px;
-    gap: 12px;
-    pointer-events: auto;
+    padding: 0 20px;
+    gap: 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    pointer-events: none; /* Permite hacer clic en lo que hay detrás */
   }
 
-  .logo {
+  .logo-mini {
     width: 28px;
     height: 28px;
     border-radius: 8px;
-    display: grid;
-    place-items: center;
     background: linear-gradient(135deg, var(--blue), var(--green));
     color: #03111d;
+    display: grid;
+    place-items: center;
     font-weight: 900;
     font-size: 14px;
-    flex: 0 0 auto;
-    box-shadow: 0 4px 10px rgba(78,161,255,.15);
   }
 
-  .brand-title {
+  .brand-name {
     color: var(--text);
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 800;
     letter-spacing: 0.5px;
-    white-space: nowrap;
   }
 
-  .room-badge {
-    display: inline-flex;
-    align-items: center;
-    padding: 4px 10px;
+  .room-info {
+    padding: 4px 12px;
     border-radius: 999px;
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    color: var(--muted);
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 0.05em;
-    white-space: nowrap;
-  }
-
-  .status-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--green);
-    box-shadow: 0 0 0 3px rgba(45, 220, 134, .12);
-    margin-right: 8px;
-  }
-
-  @media (max-width: 768px) {
-    .streamjav-overlay { width: calc(100% - 140px); }
-    .brand-title { display: none; }
+    color: var(--green);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
   }
 </style>
 </head>
@@ -101,12 +85,9 @@
 <body>
 
 <div class="streamjav-overlay">
-  <div class="logo">S</div>
-  <div class="brand-title">STREAMJAV STUDIO</div>
-  <div class="room-badge">
-    <div class="status-dot"></div>
-    SALA: <span id="display-room"></span>
-  </div>
+  <div class="logo-mini">S</div>
+  <div class="brand-name">STREAMJAV STUDIO</div>
+  <div class="room-info" id="room-display">SALA: —</div>
 </div>
 
 <iframe id="frame" allow="camera; microphone; display-capture; autoplay; fullscreen"></iframe>
@@ -119,14 +100,26 @@ const push = params.get("push") || "2dj5BAw";
 const name = params.get("name") || "vMix Video";
 const audio = params.get("audio") || "Line 1 (Virtual Audio Cable)";
 
-document.getElementById("display-room").textContent = room;
+// Actualizar barra visual
+document.getElementById("room-display").textContent = `SALA: ${room}`;
 
 const audioFormatted = audio.replaceAll(" ", "*");
 
-// AQUÍ ESTÁ EL CAMBIO: Se añadió ?v=1.1 al final del enlace del CSS
-const cssUrl = "https://streamjav.github.io/VIDEOLLAMADASPRO/estilos-ninja.css?v=1.1";
+/** * CONFIGURACIÓN DE TRADUCCIÓN Y ESTILO
+ * lang=es: Traduce botones internos de VDO.Ninja
+ * css: Carga tu archivo de GitHub para traducir los títulos principales
+ */
+const cssPath = "https://streamjav.github.io/VIDEOLLAMADASPRO/estilos-ninja.css?v=1.1";
 
-const url = `https://vdo.ninja/?director=${room}&vlabel=${name.replaceAll(" ","*")}&alabel=${audioFormatted}&push=${push}&autoplay=1&autostart=1&directorstfu=1&webcam=1&vd=vMix&ad=Line&lang=es&css=${cssUrl}`;
+const url = `https://vdo.ninja/?director=${room}` +
+            `&vlabel=${encodeURIComponent(name)}` +
+            `&alabel=${audioFormatted}` +
+            `&push=${push}` +
+            `&autoplay=1` +
+            `&autostart=1` +
+            `&lang=es` + // FORZAR ESPAÑOL
+            `&css=${cssPath}` + // INYECTAR TU CSS
+            `&webcam=1&vd=vMix&ad=Line`;
 
 document.getElementById("frame").src = url;
 </script>
