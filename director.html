@@ -105,20 +105,17 @@ document.getElementById("room-display").textContent = `SALA: ${room}`;
 
 const audioFormatted = audio.replaceAll(" ", "*");
 
-/** * CONFIGURACIÓN DE TRADUCCIÓN Y ESTILO
- * lang=es: Traduce botones internos de VDO.Ninja
- * css: Carga tu archivo de GitHub para traducir los títulos principales
+/** * CONFIGURACIÓN DE URL
+ * Se mantiene lang=es para la interfaz nativa de VDO.Ninja
+ * Se ha eliminado la inyección de CSS externo
  */
-const cssPath = "https://streamjav.github.io/VIDEOLLAMADASPRO/estilos-ninja.css?v=1.1";
-
 const url = `https://vdo.ninja/?director=${room}` +
             `&vlabel=${encodeURIComponent(name)}` +
             `&alabel=${audioFormatted}` +
             `&push=${push}` +
             `&autoplay=1` +
             `&autostart=1` +
-            `&lang=es` + // FORZAR ESPAÑOL
-            `&css=${cssPath}` + // INYECTAR TU CSS
+            `&lang=es` + 
             `&webcam=1&vd=vMix&ad=Line`;
 
 document.getElementById("frame").src = url;
