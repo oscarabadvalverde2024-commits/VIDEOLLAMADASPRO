@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>StreamJav Director</title>
+<title>StreamJav Director | Control de Video</title>
 
 <style>
   :root {
@@ -20,33 +20,29 @@
     font-family: 'Inter', system-ui, sans-serif;
   }
   
-  /* Contenedor del Iframe */
   iframe {
     position: fixed;
-    top: 0;
+    top: 48px; /* Bajamos el iframe para que no lo tape la barra */
     left: 0;
     width: 100%;
-    height: 100%;
+    height: calc(100% - 48px);
     border: none;
     z-index: 1;
   }
 
-  /* Barra Superior StreamJav */
   .streamjav-overlay {
     position: fixed;
     top: 0;
     left: 0;
     height: 48px;
     width: 100%;
-    background: rgba(7, 17, 31, 0.95);
-    backdrop-filter: blur(10px);
+    background: #07111f;
     z-index: 10;
     display: flex;
     align-items: center;
     padding: 0 20px;
     gap: 15px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    pointer-events: none; /* Crucial: permite interactuar con el panel de Ninja */
   }
 
   .logo-mini {
@@ -55,28 +51,23 @@
     border-radius: 8px;
     background: linear-gradient(135deg, var(--blue), var(--green));
     color: #03111d;
-    display: grid;
-    place-items: center;
-    font-weight: 900;
-    font-size: 14px;
+    display: grid; place-items: center;
+    font-weight: 900; font-size: 14px;
   }
 
   .brand-name {
     color: var(--text);
     font-size: 14px;
     font-weight: 800;
-    letter-spacing: 0.5px;
   }
 
   .room-info {
     padding: 4px 12px;
     border-radius: 999px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(45, 220, 134, 0.1);
     color: var(--green);
     font-size: 11px;
     font-weight: 700;
-    text-transform: uppercase;
   }
 </style>
 </head>
@@ -94,26 +85,23 @@
 <script>
 const params = new URLSearchParams(location.search);
 
-// 1. Recolección de variables (dinámicas desde index.html)
 const room = params.get("room") || "PROINKASWITCH";
 const push = params.get("push") || "2dj5BAw";
 const name = params.get("name") || "vMix Video";
 const audio = params.get("audio") || "Line 1 (Virtual Audio Cable)";
 
-// Actualizar barra de UI propia
 document.getElementById("room-display").textContent = `SALA: ${room}`;
 
-// 2. Formateo de etiquetas para VDO.Ninja
 const audioFormatted = audio.replaceAll(" ", "*");
-const videoLabel = encodeURIComponent(name);
 
 /**
- * 3. Construcción de URL optimizada
- * &hidelinks=1: Elimina los cuadros de Invitación y Escena (lo que estaba en naranja)
- * &vd=vMix &ad=Line: Forzado de hardware para broadcast
+ * PARÁMETROS DE LIMPIEZA TOTAL:
+ * &clean=1: Elimina la mayoría de textos y botones de ayuda.
+ * &hidelinks=1: Quita específicamente lo que marcaste en naranja.
+ * &noheader=1: Elimina el encabezado gris de VDO.Ninja.
  */
 const url = `https://vdo.ninja/?director=${room}` +
-            `&vlabel=${videoLabel}` +
+            `&vlabel=${encodeURIComponent(name)}` +
             `&alabel=${audioFormatted}` +
             `&push=${push}` +
             `&autoplay=1` +
@@ -123,9 +111,9 @@ const url = `https://vdo.ninja/?director=${room}` +
             `&vd=vMix` +
             `&ad=Line` +
             `&hidelinks=1` + 
-            `&directorstfu=1`;
+            `&clean=1` + 
+            `&noheader=1`;
 
-// 4. Inyección en el iframe
 document.getElementById("frame").src = url;
 </script>
 
