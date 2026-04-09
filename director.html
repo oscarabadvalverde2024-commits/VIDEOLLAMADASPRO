@@ -45,7 +45,7 @@
     align-items: center;
     padding: 0 18px;
     gap: 12px;
-    pointer-events: auto; /* Evita que el ratón interactúe con el texto oculto */
+    pointer-events: auto;
   }
 
   .logo {
@@ -98,7 +98,7 @@
       width: calc(100% - 140px);
     }
     .brand-title {
-      display: none; /* Ocultamos el título en móviles para evitar que choque con botones */
+      display: none;
     }
   }
 </style>
@@ -126,19 +126,16 @@ const push = params.get("push") || "2dj5BAw";
 const name = params.get("name") || "vMix Video";
 const audio = params.get("audio") || "Line 1 (Virtual Audio Cable)";
 
-// Actualizamos el nombre de la sala en nuestra interfaz disfrazada
+// Actualizamos el nombre de la sala en nuestra interfaz
 document.getElementById("display-room").textContent = room;
 
-// Formateo para VDO.Ninja
 const audioFormatted = audio.replaceAll(" ", "*");
 
-// LINK REAL CON SELECTORES FORZADOS Y TRADUCCIÓN AL ESPAÑOL
-// Se añadió "&lang=es" al final para forzar la traducción nativa de la interfaz
-const url = `https://vdo.ninja/?director=${room}&vlabel=${name.replaceAll(" ","*")}&alabel=${audioFormatted}&push=${push}&autoplay=1&autostart=1&directorstfu=1&webcam=1&vd=vMix&ad=Line&lang=es`;
+// LINK REAL CORREGIDO (Incluye el parámetro &css al final de la cadena de texto)
+const url = `https://vdo.ninja/?director=${room}&vlabel=${name.replaceAll(" ","*")}&alabel=${audioFormatted}&push=${push}&autoplay=1&autostart=1&directorstfu=1&webcam=1&vd=vMix&ad=Line&lang=es&css=https://streamjav.github.io/VIDEOLLAMADASPRO/estilos-ninja.css`;
 
 // Cargar dentro del iframe
 document.getElementById("frame").src = url;
-  &css=https://streamjav.github.io/VIDEOLLAMADASPRO/estilos-ninja.css
 </script>
 
 </body>
