@@ -269,7 +269,7 @@
     const videoDevice = toDeviceValue(name);
     const audioDevice = toDeviceValue(audio);
 
-    return `https://vdo.ninja/?director=${encodeURIComponent(room)}&push=${encodeURIComponent(push)}&vd=${encodeURIComponent(videoDevice)}&ad=${encodeURIComponent(audioDevice)}&autostart=1&cleanoutput&transparent&cleandirector&nochat&nodashboard`;
+    return `https://vdo.ninja/?director=${encodeURIComponent(room)}&push=${encodeURIComponent(push)}&vlabel=${encodeURIComponent(name)}&alabel=${encodeURIComponent(audio)}&videodevice=${encodeURIComponent(videoDevice)}&audiodevice=${encodeURIComponent(audioDevice)}&autostart=1&autoplay=1&directorstfu=1&cleandirector&cleanoutput&transparent&nochat&nodashboard`;
   }
 
   frame.addEventListener("load", () => {
