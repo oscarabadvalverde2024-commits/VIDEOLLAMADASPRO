@@ -11,7 +11,6 @@
     --blue: #4ea1ff;
     --green: #2ddc86;
     --text: #eef4ff;
-    --muted: #a4b7d5;
   }
   
   body {
@@ -47,7 +46,7 @@
     padding: 0 20px;
     gap: 15px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    pointer-events: none; /* Permite clics en el iframe debajo */
+    pointer-events: none; /* Crucial: permite interactuar con el panel de Ninja */
   }
 
   .logo-mini {
@@ -95,26 +94,38 @@
 <script>
 const params = new URLSearchParams(location.search);
 
+// 1. Recolección de variables (dinámicas desde index.html)
 const room = params.get("room") || "PROINKASWITCH";
 const push = params.get("push") || "2dj5BAw";
 const name = params.get("name") || "vMix Video";
 const audio = params.get("audio") || "Line 1 (Virtual Audio Cable)";
 
-// Actualizar barra visual
+// Actualizar barra de UI propia
 document.getElementById("room-display").textContent = `SALA: ${room}`;
 
+// 2. Formateo de etiquetas para VDO.Ninja
 const audioFormatted = audio.replaceAll(" ", "*");
+const videoLabel = encodeURIComponent(name);
 
-// Construcción de la URL sin dependencias externas de CSS
+/**
+ * 3. Construcción de URL optimizada
+ * &hidelinks=1: Elimina los cuadros de Invitación y Escena (lo que estaba en naranja)
+ * &vd=vMix &ad=Line: Forzado de hardware para broadcast
+ */
 const url = `https://vdo.ninja/?director=${room}` +
-            `&vlabel=${encodeURIComponent(name)}` +
+            `&vlabel=${videoLabel}` +
             `&alabel=${audioFormatted}` +
             `&push=${push}` +
             `&autoplay=1` +
             `&autostart=1` +
-            `&lang=es` + // Mantiene la interfaz de VDO.Ninja en español
-            `&webcam=1&vd=vMix&ad=Line`;
+            `&lang=es` +
+            `&webcam=1` +
+            `&vd=vMix` +
+            `&ad=Line` +
+            `&hidelinks=1` + 
+            `&directorstfu=1`;
 
+// 4. Inyección en el iframe
 document.getElementById("frame").src = url;
 </script>
 
