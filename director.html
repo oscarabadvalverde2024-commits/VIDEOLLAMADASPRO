@@ -107,30 +107,19 @@ document.getElementById("room-display").textContent = `SALA: ${room}`;
 
 const audioFormatted = audio.replaceAll(" ", "*");
 
-/** * INYECCIÓN DE CSS INTERNO
- * Ocultamos únicamente la zona superior de invitaciones y escenas
+/**
+ * URL del director con modo limpio.
+ * &cleandirector oculta la zona de enlaces de invitación del director.
  */
-const ninjaCSS = `
-  #headerLinks, 
-  #invite_links, 
-  .invite-container, 
-  div[style*="border-bottom: 2px solid"] { 
-      display: none !important; 
-  }
-`;
-const base64CSS = btoa(ninjaCSS);
-const cssInyectado = "data:text/css;base64," + base64CSS;
-
-/** * CONFIGURACIÓN DE URL */
 const url = `https://vdo.ninja/?director=${room}` +
+            `&cleandirector` +
             `&vlabel=${encodeURIComponent(name)}` +
             `&alabel=${audioFormatted}` +
             `&push=${push}` +
             `&autoplay=1` +
             `&autostart=1` +
-            `&lang=es` + 
-            `&webcam=1&vd=vMix&ad=Line` +
-            `&css=${cssInyectado}`; /* <-- CSS aplicado quirúrgicamente aquí */
+            `&lang=es` +
+            `&webcam=1&vd=vMix&ad=Line`;
 
 document.getElementById("frame").src = url;
 </script>
