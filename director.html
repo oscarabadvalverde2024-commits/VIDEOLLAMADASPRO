@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>StreamJav Director</title>
 
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%234ea1ff'><path d='M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z'/></svg>">
+
 <style>
   :root {
     --bg: #07111f;
@@ -21,7 +23,7 @@
     font-family: 'Inter', system-ui, sans-serif;
   }
   
-  /* Contenedor del Iframe (Restaurado a su tamaño normal para no cortar ajustes) */
+  /* Contenedor del Iframe */
   iframe {
     position: fixed;
     top: 0;
@@ -32,7 +34,7 @@
     z-index: 1;
   }
 
-  /* Barra Superior StreamJav */
+  /* Barra Superior StreamJav (Se dibuja sobre el Iframe) */
   .streamjav-overlay {
     position: fixed;
     top: 0;
@@ -47,7 +49,7 @@
     padding: 0 20px;
     gap: 15px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    pointer-events: none;
+    pointer-events: none; /* Permite hacer clic en lo que hay detrás */
   }
 
   .logo-mini {
@@ -100,37 +102,26 @@ const push = params.get("push") || "2dj5BAw";
 const name = params.get("name") || "vMix Video";
 const audio = params.get("audio") || "Line 1 (Virtual Audio Cable)";
 
+// Actualizar barra visual
 document.getElementById("room-display").textContent = `SALA: ${room}`;
+
 const audioFormatted = audio.replaceAll(" ", "*");
 
-/* =========================================================
-   1. CREACIÓN DEL CSS INTERNO (Sin archivos externos)
-   ========================================================= */
+/** * INYECCIÓN DE CSS INTERNO
+ * Ocultamos únicamente la zona superior de invitaciones y escenas
+ */
 const ninjaCSS = `
-  /* Ocultar la caja superior de "LINKS (GUEST INVITES & SCENES)" */
   #headerLinks, 
   #invite_links, 
   .invite-container, 
   div[style*="border-bottom: 2px solid"] { 
       display: none !important; 
   }
-
-  /* Ocultar el "Director's solo link" en el menú de ajustes (Cuadro rojo) */
-  #soloLinkContainer, 
-  #soloLinkBox, 
-  div[data-translate="director_solo_link"] { 
-      display: none !important; 
-  }
 `;
-
-/* =========================================================
-   2. CONVERSIÓN A BASE64 PARA INYECTARLO EN LA URL
-   ========================================================= */
-// Convertimos el texto CSS a código para que la URL lo lea
 const base64CSS = btoa(ninjaCSS);
 const cssInyectado = "data:text/css;base64," + base64CSS;
 
-/* Generamos la URL sumando nuestro CSS inyectado al final */
+/** * CONFIGURACIÓN DE URL */
 const url = `https://vdo.ninja/?director=${room}` +
             `&vlabel=${encodeURIComponent(name)}` +
             `&alabel=${audioFormatted}` +
@@ -139,7 +130,7 @@ const url = `https://vdo.ninja/?director=${room}` +
             `&autostart=1` +
             `&lang=es` + 
             `&webcam=1&vd=vMix&ad=Line` +
-            `&css=${cssInyectado}`; /* <-- Aquí entra la magia */
+            `&css=${cssInyectado}`; /* <-- CSS aplicado quirúrgicamente aquí */
 
 document.getElementById("frame").src = url;
 </script>
