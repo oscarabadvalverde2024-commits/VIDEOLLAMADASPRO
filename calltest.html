@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#0b0e14">
+    <title>StreamJav | Conexión de Invitado</title>
+    <style>
+        :root {
+            --bg: #0b0e14;
+            --bg2: #0f1320;
+            --card: #161b22;
+            --card-2: #0f141c;
+            --accent: #3b82f6;
+            --accent-2: #2563eb;
+            --green: #22c55e;
+            --green-2: #16a34a;
+            --text: #e2e8f0;
+            --text-muted: #94a3b8;
+            --line: rgba(255, 255, 255, 0.08);
+            --shadow: 0 20px 50px rgba(0, 0, 0, 0.50);
+            --radius: 24px;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            min-height: 100%;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background:
+                radial-gradient(900px 500px at 20% 0%, rgba(59, 130, 246, 0.12), transparent 55%),
+                radial-gradient(700px 500px at 100% 10%, rgba(96, 165, 250, 0.08), transparent 45%),
+                linear-gradient(180deg, var(--bg), var(--bg2));
+            color: var(--text);
+            overflow-x: hidden;
+            touch-action: manipulation;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100svh;
+            padding: calc(10px + env(safe-area-inset-top)) 10px calc(14px + env(safe-area-inset-bottom));
+        }
+
+        .main-container {
+            width: min(100%, 430px);
+            background: linear-gradient(180deg, rgba(22, 27, 34, 0.96), rgba(15, 20, 28, 0.96));
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 28px;
+            box-shadow: var(--shadow);
+            padding: 16px;
+            text-align: center;
+            position: relative;
+            z-index: 10;
+            backdrop-filter: blur(12px);
+        }
+
+        .top-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .brand-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            color: #dbeafe;
+            background: rgba(59, 130, 246, 0.12);
+            border: 1px solid rgba(59, 130, 246, 0.22);
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-muted);
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--line);
+            white-space: nowrap;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #22c55e;
+            box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.10);
+            flex: 0 0 auto;
+        }
+
+        h1 {
+            font-size: clamp(22px, 5vw, 30px);
+            line-height: 1.05;
+            margin: 2px 0 6px;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+
+        .room-label {
+            display: block;
+            margin-bottom: 12px;
+            color: var(--accent-3, #60a5fa);
+            font-size: 13px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: .06em;
+        }
+
+        .subtext {
+            margin: 0 0 14px;
+            color: var(--text-muted);
+            font-size: 13px;
+            line-height: 1.45;
+        }
+
+        .preview-box {
+            width: 100%;
+            aspect-ratio: 4 / 5;
+            max-height: 54vh;
+            background: #05070c;
+            border-radius: 22px;
+            margin-bottom: 14px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,0.02);
+        }
+
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            background: #05070c;
+            display: block;
+        }
+
+        .camera-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .cam-btn {
+            min-height: 54px;
+            padding: 12px 6px;
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.08);
+            background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+            color: #e5eefc;
+            font-size: 13px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: transform .16s ease, border-color .16s ease, background .16s ease, color .16s ease;
+            width: 100%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .cam-btn:active {
+            transform: translateY(1px);
+        }
+
+        .cam-btn.active {
+            border-color: rgba(59, 130, 246, 0.45);
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.22), rgba(37, 99, 235, 0.16));
+            color: #ffffff;
+            box-shadow: 0 10px 24px rgba(59, 130, 246, 0.12);
+        }
+
+        .btn-start {
+            width: 100%;
+            min-height: 58px;
+            padding: 16px 18px;
+            background: linear-gradient(135deg, var(--green) 0%, var(--green-2) 100%);
+            border: none;
+            border-radius: 16px;
+            color: white;
+            font-size: 16px;
+            font-weight: 800;
+            letter-spacing: .02em;
+            cursor: pointer;
+            transition: transform .16s ease, filter .16s ease, opacity .16s ease;
+            box-shadow: 0 10px 24px rgba(34, 197, 94, 0.22);
+        }
+
+        .btn-start:hover {
+            filter: brightness(1.02);
+        }
+
+        .btn-start:active {
+            transform: translateY(1px);
+        }
+
+        .btn-start:disabled {
+            background: #30363d;
+            color: #94a3b8;
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+
+        #vdo-frame {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100svh;
+            border: none;
+            background: #000;
+            z-index: 1;
+            opacity: 0;
+            transition: opacity 0.35s ease;
+        }
+
+        @media (max-width: 420px) {
+            body {
+                padding-left: 8px;
+                padding-right: 8px;
+            }
+
+            .main-container {
+                padding: 14px;
+                border-radius: 26px;
+            }
+
+            .preview-box {
+                aspect-ratio: 3 / 4;
+                max-height: 50vh;
+            }
+
+            .camera-row {
+                gap: 8px;
+            }
+
+            .cam-btn {
+                min-height: 50px;
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="main-container" id="setup-ui">
+    <div class="top-row">
+        <div class="brand-badge">STREAMJAV</div>
+        <div class="status-pill"><span class="status-dot"></span><span>Listo para entrar</span></div>
+    </div>
+
+    <h1 id="user-title">Bienvenido</h1>
+    <span class="room-label" id="room-name">SALA: VIDEOLLAMADA</span>
+    <p class="subtext">Selecciona tu cámara, micrófono y comienza la transmisión</p>
+
+    <div class="preview-box">
+        <video id="local-preview" autoplay muted playsinline></video>
+    </div>
+
+    <div class="camera-row">
+        <div style="position: relative; width: 100%;">
+            <button type="button" class="cam-btn active" id="btn-video">📹 Fuente de Video</button>
+            <select id="video-select" onchange="cambiarDispositivo('video')" style="position: absolute; top:0; left:0; width:100%; height:100%; opacity:0; cursor:pointer;"></select>
+        </div>
+        <div style="position: relative; width: 100%;">
+            <button type="button" class="cam-btn" id="btn-audio">🎤 Fuente de Audio</button>
+            <select id="audio-select" onchange="cambiarDispositivo('audio')" style="position: absolute; top:0; left:0; width:100%; height:100%; opacity:0; cursor:pointer;"></select>
+        </div>
+    </div>
+
+    <button class="btn-start" id="btn-start" onclick="iniciarStream()">COMENZAR TRANSMISIÓN</button>
+</div>
+
+<iframe id="vdo-frame" allow="camera *; microphone *; autoplay *; display-capture *; fullscreen" referrerpolicy="no-referrer"></iframe>
+
+<script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const room = urlParams.get('room') || 'SALA_PRO';
+    const push = urlParams.get('push') || 'ID_INVITADO';
+    const name = urlParams.get('name') || 'Invitado';
+
+    document.getElementById('user-title').innerText = `Bienvenido ${name}`;
+    document.getElementById('room-name').innerText = `SALA: ${room}`;
+
+    const preview = document.getElementById('local-preview');
+    const btnStart = document.getElementById('btn-start');
+    const btnVideo = document.getElementById('btn-video');
+    const btnAudio = document.getElementById('btn-audio');
+    const videoSelect = document.getElementById('video-select');
+    const audioSelect = document.getElementById('audio-select');
+    
+    let currentStream = null;
+
+    function traducirNombre(label, index, tipo) {
+        let l = (label || '').toLowerCase();
+        if (tipo === 'video') {
+            if (l.includes('back') || l.includes('trasera') || l.includes('environment')) return "Cámara Trasera";
+            if (l.includes('front') || l.includes('frontal') || l.includes('user')) return "Cámara Frontal";
+            return label || `Cámara ${index + 1}`;
+        } else {
+            return label || `Micrófono ${index + 1}`;
+        }
+    }
+
+    async function cargarDispositivos() {
+        try {
+            // Solicitar permisos primero para obtener los nombres reales
+            const temp = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+            temp.getTracks().forEach(t => t.stop());
+
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            const videoDevices = devices.filter(d => d.kind === 'videoinput');
+            const audioDevices = devices.filter(d => d.kind === 'audioinput');
+
+            videoSelect.innerHTML = '';
+            videoDevices.forEach((device, index) => {
+                const option = document.createElement('option');
+                option.value = device.deviceId;
+                option.text = traducirNombre(device.label, index, 'video');
+                videoSelect.appendChild(option);
+            });
+
+            audioSelect.innerHTML = '';
+            audioDevices.forEach((device, index) => {
+                const option = document.createElement('option');
+                option.value = device.deviceId;
+                option.text = traducirNombre(device.label, index, 'audio');
+                audioSelect.appendChild(option);
+            });
+
+            // Seleccionar por defecto la cámara frontal si existe
+            let frontIdx = Array.from(videoSelect.options).findIndex(opt => opt.text.includes('Frontal'));
+            if(frontIdx >= 0) videoSelect.selectedIndex = frontIdx;
+
+            actualizarNombresBotones();
+            actualizarPreview();
+        } catch (e) {
+            alert("Por favor, permite el acceso a la cámara y al micrófono.");
+        }
+    }
+
+    function cambiarDispositivo(tipo) {
+        actualizarNombresBotones();
+        actualizarPreview();
+    }
+
+    function actualizarNombresBotones() {
+        if (videoSelect.options.length > 0) {
+            btnVideo.innerText = "📹 " + videoSelect.options[videoSelect.selectedIndex].text;
+        }
+        if (audioSelect.options.length > 0) {
+            btnAudio.innerText = "🎤 " + audioSelect.options[audioSelect.selectedIndex].text;
+        }
+    }
+
+    async function actualizarPreview() {
+        if (currentStream) {
+            currentStream.getTracks().forEach(t => t.stop());
+        }
+        try {
+            const vId = videoSelect.value;
+            const aId = audioSelect.value;
+
+            const constraints = {
+                video: vId ? { deviceId: { exact: vId } } : true,
+                audio: aId ? { deviceId: { exact: aId } } : true
+            };
+
+            currentStream = await navigator.mediaDevices.getUserMedia(constraints);
+            preview.srcObject = currentStream;
+        } catch (e) {
+            console.warn("Fallo al aplicar constraints exactos, usando default:", e);
+            currentStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+            preview.srcObject = currentStream;
+        }
+    }
+
+    function iniciarStream() {
+        const vText = (videoSelect.options[videoSelect.selectedIndex] && videoSelect.options[videoSelect.selectedIndex].text || '').toLowerCase();
+        const aText = (audioSelect.options[audioSelect.selectedIndex] && audioSelect.options[audioSelect.selectedIndex].text || '');
+        
+        let facing = "";
+        if (vText.includes('trasera')) facing = "back";
+        else if (vText.includes('frontal')) facing = "front";
+
+        if (currentStream) {
+            currentStream.getTracks().forEach(t => t.stop());
+            preview.srcObject = null;
+        }
+
+        btnStart.innerText = "CONECTANDO...";
+        btnStart.disabled = true;
+
+        let ninjaUrl = `https://vdo.ninja/?room=${room}&push=${push}&label=${encodeURIComponent(name)}&autostart=1&webcam=1&clean=1&nochat=1`;
+
+        // Mandar el parámetro correcto de video a VDO Ninja
+        if (facing) {
+            ninjaUrl += `&facing=${facing}`;
+        } else if (vText) {
+            ninjaUrl += `&camera=${encodeURIComponent(vText)}`;
+        }
+
+        // Mandar el parámetro correcto de audio a VDO Ninja
+        if (aText) {
+            ninjaUrl += `&mic=${encodeURIComponent(aText)}`;
+        }
+
+        const frame = document.getElementById('vdo-frame');
+        frame.src = ninjaUrl;
+
+        setTimeout(() => {
+            document.getElementById('setup-ui').style.display = "none";
+            frame.style.opacity = "1";
+            frame.style.zIndex = "9999";
+        }, 1200);
+    }
+
+    cargarDispositivos();
+</script>
+</body>
+</html>
